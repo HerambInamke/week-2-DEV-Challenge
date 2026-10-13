@@ -1,0 +1,33 @@
+# JavaScript / Vite
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Local environment and secrets (keep example templates)
+.env*
+!.env.example
+!**/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.coverage
+.coverage.*
+
+# Logs and local operating-system files
+*.log
+*-debug.log*
+logs/
+.DS_Store
+Thumbs.db
+
+.venv
+.claude

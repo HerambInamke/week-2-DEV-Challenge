@@ -1,0 +1,10 @@
+{
+  "description": "Discover and analyze potential ambiguities in instructions with an AI that explores multiple interpretations and simulates their outcomes for safer decision-making.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

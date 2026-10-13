@@ -1,0 +1,266 @@
+{
+  "delete old user records.": {
+    "status": "ok",
+    "source": "fixture_fallback",
+    "fallback_reason": null,
+    "domain": "user_management",
+    "entity_schema": {
+      "name": "user",
+      "fields": [
+        {"name": "id", "type": "string", "description": "Unique user ID"},
+        {"name": "email", "type": "string", "description": "User email address"},
+        {"name": "created_at", "type": "date", "description": "Account creation date"},
+        {"name": "last_active_at", "type": "date", "description": "Last activity timestamp"},
+        {"name": "status", "type": "string", "description": "User account status"}
+      ]
+    },
+    "world": {
+      "entity": "user",
+      "today": "2026-01-01",
+      "records": [
+        {"id": "U01", "email": "alice@corp.com", "created_at": "2025-01-10", "last_active_at": "2025-12-20", "status": "active"},
+        {"id": "U02", "email": "bob@dormant.com", "created_at": "2024-05-01", "last_active_at": "2025-05-01", "status": "dormant"},
+        {"id": "U03", "email": "carol@active.org", "created_at": "2025-01-15", "last_active_at": "2025-12-30", "status": "active"},
+        {"id": "U04", "email": "dave@old.io", "created_at": "2023-11-20", "last_active_at": "2025-01-10", "status": "dormant"},
+        {"id": "U05", "email": "eve@recent.com", "created_at": "2025-11-01", "last_active_at": "2025-12-15", "status": "active"},
+        {"id": "U06", "email": "frank@test.net", "created_at": "2025-08-14", "last_active_at": "2025-03-15", "status": "active"},
+        {"id": "U07", "email": "grace@loyal.com", "created_at": "2024-02-11", "last_active_at": "2025-12-28", "status": "active"},
+        {"id": "U08", "email": "heidi@edge.org", "created_at": "2025-10-03", "last_active_at": "2025-10-03", "status": "active", "_injected": true},
+        {"id": "U09", "email": "ivan@null.com", "created_at": "2025-10-01", "last_active_at": null, "status": "pending", "_injected": true},
+        {"id": "U10", "email": "judy@boundary.com", "created_at": "2025-10-03", "last_active_at": "2025-10-03", "status": "active", "_injected": true}
+      ]
+    },
+    "branches": [
+      {
+        "id": "A",
+        "title": "Inactive for 90+ days",
+        "assumption": "'Old' means no recorded activity for at least 90 days.",
+        "operation": "delete",
+        "update_set": null,
+        "where": {"op": "older_than_days", "field": "last_active_at", "days": 90},
+        "chosen_meanings": {"old": "inactive_90"},
+        "explanation": "Interprets 'old' as dormant user accounts based on last recorded activity timestamp."
+      },
+      {
+        "id": "B",
+        "title": "Account created 90+ days ago",
+        "assumption": "'Old' means account created more than 90 days ago regardless of recent activity.",
+        "operation": "delete",
+        "update_set": null,
+        "where": {"op": "older_than_days", "field": "created_at", "days": 90},
+        "chosen_meanings": {"old": "created_90"},
+        "explanation": "Filters strictly by account creation timestamp, endangering active long-term customers."
+      },
+      {
+        "id": "C",
+        "title": "Inactive or missing activity dates",
+        "assumption": "Accounts lacking an activity timestamp are assumed to be old and dormant.",
+        "operation": "delete",
+        "update_set": null,
+        "where": {
+          "op": "or",
+          "args": [
+            {"op": "older_than_days", "field": "last_active_at", "days": 90},
+            {"op": "is_null", "field": "last_active_at"}
+          ]
+        },
+        "chosen_meanings": {"old": "inactive_or_unknown"},
+        "explanation": "Treats missing telemetry as inactivity without verifying account state."
+      }
+    ],
+    "interpretations": [
+      {
+        "id": "A",
+        "title": "Inactive for 90 days",
+        "assumption": "'Old' means inactive for at least 90 days based on last activity.",
+        "action": {
+          "type": "delete_users",
+          "condition": "inactive_90_days"
+        },
+        "explanation": "Interprets 'old' as dormant accounts based on last recorded activity timestamp."
+      },
+      {
+        "id": "B",
+        "title": "Account created 90+ days ago",
+        "assumption": "'Old' means created more than 90 days ago, regardless of recent activity.",
+        "action": {
+          "type": "delete_users",
+          "condition": "created_90_days"
+        },
+        "explanation": "Interprets 'old' strictly by account creation date, which endangers active long-term customers."
+      },
+      {
+        "id": "C",
+        "title": "Inactive or missing activity dates",
+        "assumption": "Accounts lacking an activity timestamp are assumed to be old and dormant.",
+        "action": {
+          "type": "delete_users",
+          "condition": "inactive_or_unknown"
+        },
+        "explanation": "Treats missing telemetry as inactivity without verifying account state."
+      }
+    ],
+    "candidate_ambiguities": [
+      {
+        "term": "old",
+        "description": "Could refer to duration since account creation or duration since last user activity.",
+        "interpretation_ids": ["A", "B"]
+      },
+      {
+        "term": "missing activity dates",
+        "description": "Does not specify whether accounts with null activity dates are preserved or purged.",
+        "interpretation_ids": ["A", "C"]
+      }
+    ],
+    "suggested_rewrite": "Delete user accounts inactive for at least 90 days based on last recorded activity. Preserve accounts with missing activity dates and flag them for audit.",
+    "model_info": {
+      "model": "fixture",
+      "mode": "fixture"
+    }
+  },
+  "archive old log files.": {
+    "status": "ok",
+    "source": "fixture_fallback",
+    "fallback_reason": null,
+    "domain": "file_management",
+    "entity_schema": {
+      "name": "log_file",
+      "fields": [
+        {"name": "id", "type": "string", "description": "Unique file ID"},
+        {"name": "filename", "type": "string", "description": "File path or name"},
+        {"name": "created_at", "type": "date", "description": "Log creation date"},
+        {"name": "size_mb", "type": "float", "description": "File size in MB"},
+        {"name": "is_archived", "type": "bool", "description": "Archive state"}
+      ]
+    },
+    "world": {
+      "entity": "log_file",
+      "today": "2026-01-01",
+      "records": [
+        {"id": "LOG-01", "filename": "app_2025_01.log", "created_at": "2025-01-10", "size_mb": 150.0, "is_archived": false},
+        {"id": "LOG-02", "filename": "app_2025_11.log", "created_at": "2025-11-01", "size_mb": 12.5, "is_archived": false},
+        {"id": "LOG-03", "filename": "app_2025_12.log", "created_at": "2025-12-25", "size_mb": 4.0, "is_archived": false},
+        {"id": "LOG-04", "filename": "error_2024.log", "created_at": "2024-11-20", "size_mb": 500.0, "is_archived": false},
+        {"id": "LOG-05", "filename": "audit_2025_10.log", "created_at": "2025-10-15", "size_mb": 80.0, "is_archived": true},
+        {"id": "LOG-06", "filename": "sys_2025_09.log", "created_at": "2025-09-10", "size_mb": 45.0, "is_archived": false},
+        {"id": "LOG-07", "filename": "debug_2025_12.log", "created_at": "2025-12-30", "size_mb": 0.5, "is_archived": false},
+        {"id": "LOG-08", "filename": "auth_2025_12_02.log", "created_at": "2025-12-02", "size_mb": 35.0, "is_archived": false, "_injected": true},
+        {"id": "LOG-09", "filename": "corrupt.log", "created_at": null, "size_mb": 0.0, "is_archived": false, "_injected": true},
+        {"id": "LOG-10", "filename": "nomatch.log", "created_at": "2026-01-01", "size_mb": 0.1, "is_archived": true, "_injected": true}
+      ]
+    },
+    "branches": [
+      {
+        "id": "A",
+        "title": "Created 30+ days ago",
+        "assumption": "'Old' is defined as files created more than 30 days ago.",
+        "operation": "archive",
+        "update_set": {"is_archived": true},
+        "where": {
+          "op": "and",
+          "args": [
+            {"op": "compare", "field": "is_archived", "cmp": "eq", "value": false},
+            {"op": "older_than_days", "field": "created_at", "days": 30}
+          ]
+        },
+        "chosen_meanings": {"old": "created_30"},
+        "explanation": "Archives active unarchived logs older than 30 days."
+      },
+      {
+        "id": "B",
+        "title": "Created 90+ days ago",
+        "assumption": "'Old' is defined as files created more than 90 days ago.",
+        "operation": "archive",
+        "update_set": {"is_archived": true},
+        "where": {
+          "op": "and",
+          "args": [
+            {"op": "compare", "field": "is_archived", "cmp": "eq", "value": false},
+            {"op": "older_than_days", "field": "created_at", "days": 90}
+          ]
+        },
+        "chosen_meanings": {"old": "created_90"},
+        "explanation": "Archives only older quarterly log archives older than 90 days."
+      }
+    ],
+    "candidate_ambiguities": [
+      {
+        "term": "old",
+        "description": "Retention threshold is ambiguous: 30 days vs 90 days.",
+        "interpretation_ids": ["A", "B"]
+      }
+    ],
+    "suggested_rewrite": "Archive unarchived log files whose creation date is older than 30 days.",
+    "model_info": {
+      "model": "fixture",
+      "mode": "fixture"
+    }
+  },
+  "remove inactive users.": {
+    "status": "ok",
+    "source": "fixture_fallback",
+    "fallback_reason": null,
+    "interpretations": [
+      {
+        "id": "A",
+        "title": "Inactive for at least 90 days",
+        "assumption": "Inactivity requires at least 90 days since last recorded activity.",
+        "action": {
+          "type": "delete_users",
+          "condition": "inactive_90_days"
+        },
+        "explanation": "Applies standard 90-day inactivity threshold based on last_active_at."
+      },
+      {
+        "id": "B",
+        "title": "Inactive based on creation age",
+        "assumption": "Accounts created over 90 days ago without activity checks are considered inactive.",
+        "action": {
+          "type": "delete_users",
+          "condition": "created_90_days"
+        },
+        "explanation": "Assumes account creation age over 90 days implies dormancy."
+      },
+      {
+        "id": "C",
+        "title": "Inactive or missing activity telemetry",
+        "assumption": "Accounts lacking an activity timestamp are treated as inactive and deleted.",
+        "action": {
+          "type": "delete_users",
+          "condition": "inactive_or_unknown"
+        },
+        "explanation": "Purges users where last_active_at is null or missing without verification."
+      }
+    ],
+    "candidate_ambiguities": [
+      {
+        "term": "inactive threshold",
+        "description": "Does not define the required number of days of inactivity before deletion.",
+        "interpretation_ids": ["A", "B"]
+      },
+      {
+        "term": "missing dates",
+        "description": "Fails to specify how accounts with missing activity timestamps should be classified.",
+        "interpretation_ids": ["A", "C"]
+      }
+    ],
+    "suggested_rewrite": "Delete user accounts with recorded inactivity exceeding 90 days. Flag accounts with null activity dates for audit without deleting.",
+    "model_info": {
+      "model": "fixture",
+      "mode": "fixture"
+    }
+  },
+  "restore the latest backup if necessary.": {
+    "status": "unsupported",
+    "source": "fixture_fallback",
+    "fallback_reason": "Restore operations are unsupported as there is no defined source data to restore from.",
+    "reason": "Restore operations are unsupported as there is no defined source data to restore from. Only declarative data operations ('delete', 'archive', 'update', 'flag') are supported.",
+    "interpretations": [],
+    "candidate_ambiguities": [],
+    "suggested_rewrite": "",
+    "model_info": {
+      "model": "fixture",
+      "mode": "fixture"
+    }
+  }
+}

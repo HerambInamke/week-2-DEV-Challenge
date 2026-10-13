@@ -1,0 +1,173 @@
+{
+  "id": "archive-old-log-files",
+  "title": "When are logs old enough?",
+  "instruction": "Archive old log files",
+  "recorded_at": "2026-10-13T14:31:59+05:30",
+  "model_name": "gpt-oss:20b",
+  "model_mode": "fixture",
+  "source": "fixture_fallback",
+  "paired_case_id": null,
+  "result": {
+    "status": "ok",
+    "instruction": "Archive old log files",
+    "source": "fixture_fallback",
+    "fallback_reason": "Live models failed (Connection error.)",
+    "model_info": {
+      "model": "gpt-oss:20b",
+      "mode": "fixture"
+    },
+    "timings_ms": {
+      "total": 1220.89
+    },
+    "domain": "file_management",
+    "world": {
+      "entity": "log_file",
+      "today": "2026-01-01",
+      "record_count": 10
+    },
+    "branches": [
+      {
+        "id": "A",
+        "title": "Created 30+ days ago",
+        "assumption": "'Old' is defined as files created more than 30 days ago.",
+        "explanation": "Archives active unarchived logs older than 30 days.",
+        "operation": "archive",
+        "where": {
+          "op": "and",
+          "args": [
+            {
+              "op": "compare",
+              "field": "is_archived",
+              "cmp": "eq",
+              "value": false
+            },
+            {
+              "op": "older_than_days",
+              "field": "created_at",
+              "days": 30
+            }
+          ]
+        },
+        "update_set": {
+          "is_archived": true
+        },
+        "chosen_meanings": {
+          "old": "created_30"
+        },
+        "affected_ids": [
+          "LOG-01",
+          "LOG-02",
+          "LOG-04",
+          "LOG-06",
+          "LOG-08"
+        ],
+        "affected_count": 5
+      },
+      {
+        "id": "B",
+        "title": "Created 90+ days ago",
+        "assumption": "'Old' is defined as files created more than 90 days ago.",
+        "explanation": "Archives only older quarterly log archives older than 90 days.",
+        "operation": "archive",
+        "where": {
+          "op": "and",
+          "args": [
+            {
+              "op": "compare",
+              "field": "is_archived",
+              "cmp": "eq",
+              "value": false
+            },
+            {
+              "op": "older_than_days",
+              "field": "created_at",
+              "days": 90
+            }
+          ]
+        },
+        "update_set": {
+          "is_archived": true
+        },
+        "chosen_meanings": {
+          "old": "created_90"
+        },
+        "affected_ids": [
+          "LOG-01",
+          "LOG-04",
+          "LOG-06"
+        ],
+        "affected_count": 3
+      }
+    ],
+    "comparison": {
+      "diverges": true,
+      "distinct_sets": 2,
+      "only_in": {
+        "A": [
+          "LOG-02",
+          "LOG-08"
+        ],
+        "B": []
+      },
+      "common_ids": [
+        "LOG-01",
+        "LOG-04",
+        "LOG-06"
+      ],
+      "evidence": {
+        "diverges": true,
+        "distinct_sets": 2,
+        "total_branches": 2,
+        "common_ids": [
+          "LOG-01",
+          "LOG-04",
+          "LOG-06"
+        ],
+        "common_count": 3,
+        "empty_branches": [],
+        "only_in": {
+          "A": [
+            "LOG-02",
+            "LOG-08"
+          ],
+          "B": []
+        },
+        "differing_pairs": [
+          "A vs B"
+        ],
+        "branch_summary": {
+          "A": {
+            "affected_count": 5,
+            "affected_ids": [
+              "LOG-01",
+              "LOG-02",
+              "LOG-04",
+              "LOG-06",
+              "LOG-08"
+            ]
+          },
+          "B": {
+            "affected_count": 3,
+            "affected_ids": [
+              "LOG-01",
+              "LOG-04",
+              "LOG-06"
+            ]
+          }
+        }
+      }
+    },
+    "ambiguous_terms": [
+      {
+        "term": "old",
+        "description": "Retention threshold is ambiguous: 30 days vs 90 days.",
+        "interpretation_ids": [
+          "A",
+          "B"
+        ]
+      }
+    ],
+    "suggested_rewrite": "Archive unarchived log files whose creation date is older than 30 days.",
+    "warnings": []
+  }
+}

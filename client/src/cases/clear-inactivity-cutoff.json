@@ -1,0 +1,113 @@
+{
+  "id": "clear-inactivity-cutoff",
+  "title": "A precise inactivity rule",
+  "instruction": "Delete user accounts inactive for at least 90 days based on last recorded activity. Preserve accounts with missing activity dates.",
+  "recorded_at": "2026-10-13T14:31:59+05:30",
+  "model_name": "gpt-oss:20b",
+  "model_mode": "fixture",
+  "source": "fixture_fallback",
+  "paired_case_id": "delete-old-user-records",
+  "result": {
+    "status": "ok",
+    "instruction": "Delete user accounts inactive for at least 90 days based on last recorded activity. Preserve accounts with missing activity dates.",
+    "source": "fixture_fallback",
+    "fallback_reason": "Live models failed (Connection error.)",
+    "model_info": {
+      "model": "gpt-oss:20b",
+      "mode": "fixture"
+    },
+    "timings_ms": {
+      "total": 5266.37
+    },
+    "domain": "user_management",
+    "world": {
+      "entity": "user",
+      "today": "2026-01-01",
+      "record_count": 10
+    },
+    "branches": [
+      {
+        "id": "A",
+        "title": "Recorded activity is at least 90 days old",
+        "assumption": "Only a recorded last activity date at least 90 days old qualifies for deletion.",
+        "explanation": "Uses last_active_at for the cutoff and leaves records with missing activity dates untouched.",
+        "operation": "delete",
+        "where": {
+          "op": "older_than_days",
+          "field": "last_active_at",
+          "days": 90
+        },
+        "update_set": null,
+        "chosen_meanings": {},
+        "affected_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ],
+        "affected_count": 5
+      }
+    ],
+    "comparison": {
+      "diverges": false,
+      "distinct_sets": 1,
+      "only_in": {
+        "A": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ]
+      },
+      "common_ids": [
+        "U02",
+        "U04",
+        "U06",
+        "U08",
+        "U10"
+      ],
+      "evidence": {
+        "diverges": false,
+        "distinct_sets": 1,
+        "total_branches": 1,
+        "common_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ],
+        "common_count": 5,
+        "empty_branches": [],
+        "only_in": {
+          "A": [
+            "U02",
+            "U04",
+            "U06",
+            "U08",
+            "U10"
+          ]
+        },
+        "differing_pairs": [],
+        "branch_summary": {
+          "A": {
+            "affected_count": 5,
+            "affected_ids": [
+              "U02",
+              "U04",
+              "U06",
+              "U08",
+              "U10"
+            ]
+          }
+        }
+      }
+    },
+    "ambiguous_terms": [],
+    "suggested_rewrite": "Delete user accounts inactive for at least 90 days based on last recorded activity. Preserve accounts with missing activity dates.",
+    "warnings": []
+  },
+  "pair_role": "after"
+}

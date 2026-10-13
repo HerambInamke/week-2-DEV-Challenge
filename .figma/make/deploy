@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --dir client run build
+figma make deploy --build-dir client/dist

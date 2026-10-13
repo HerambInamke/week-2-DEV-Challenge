@@ -1,0 +1,216 @@
+{
+  "id": "remove-inactive-users",
+  "title": "How do we define inactive?",
+  "instruction": "Remove inactive users",
+  "recorded_at": "2026-10-13T14:31:59+05:30",
+  "model_name": "gpt-oss:20b",
+  "model_mode": "fixture",
+  "source": "fixture_fallback",
+  "paired_case_id": null,
+  "result": {
+    "status": "ok",
+    "instruction": "Remove inactive users",
+    "source": "fixture_fallback",
+    "fallback_reason": "Live models failed (Connection error.)",
+    "model_info": {
+      "model": "gpt-oss:20b",
+      "mode": "fixture"
+    },
+    "timings_ms": {
+      "total": 5501.45
+    },
+    "domain": null,
+    "world": {
+      "entity": "user",
+      "today": "2026-01-01",
+      "record_count": 10
+    },
+    "branches": [
+      {
+        "id": "A",
+        "title": "Inactive for at least 90 days",
+        "assumption": "Inactivity requires at least 90 days since last recorded activity.",
+        "explanation": "Applies standard 90-day inactivity threshold based on last_active_at.",
+        "operation": "delete",
+        "where": {
+          "op": "older_than_days",
+          "field": "last_active_at",
+          "days": 90
+        },
+        "update_set": null,
+        "chosen_meanings": {},
+        "affected_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ],
+        "affected_count": 5
+      },
+      {
+        "id": "B",
+        "title": "Inactive based on creation age",
+        "assumption": "Accounts created over 90 days ago without activity checks are considered inactive.",
+        "explanation": "Assumes account creation age over 90 days implies dormancy.",
+        "operation": "delete",
+        "where": {
+          "op": "older_than_days",
+          "field": "created_at",
+          "days": 90
+        },
+        "update_set": null,
+        "chosen_meanings": {},
+        "affected_ids": [
+          "U01",
+          "U02",
+          "U03",
+          "U04",
+          "U06",
+          "U07",
+          "U08",
+          "U09",
+          "U10"
+        ],
+        "affected_count": 9
+      },
+      {
+        "id": "C",
+        "title": "Inactive or missing activity telemetry",
+        "assumption": "Accounts lacking an activity timestamp are treated as inactive and deleted.",
+        "explanation": "Purges users where last_active_at is null or missing without verification.",
+        "operation": "delete",
+        "where": {
+          "op": "or",
+          "args": [
+            {
+              "op": "older_than_days",
+              "field": "last_active_at",
+              "days": 90
+            },
+            {
+              "op": "is_null",
+              "field": "last_active_at"
+            }
+          ]
+        },
+        "update_set": null,
+        "chosen_meanings": {},
+        "affected_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U09",
+          "U10"
+        ],
+        "affected_count": 6
+      }
+    ],
+    "comparison": {
+      "diverges": true,
+      "distinct_sets": 3,
+      "only_in": {
+        "A": [],
+        "B": [
+          "U01",
+          "U03",
+          "U07"
+        ],
+        "C": []
+      },
+      "common_ids": [
+        "U02",
+        "U04",
+        "U06",
+        "U08",
+        "U10"
+      ],
+      "evidence": {
+        "diverges": true,
+        "distinct_sets": 3,
+        "total_branches": 3,
+        "common_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ],
+        "common_count": 5,
+        "empty_branches": [],
+        "only_in": {
+          "A": [],
+          "B": [
+            "U01",
+            "U03",
+            "U07"
+          ],
+          "C": []
+        },
+        "differing_pairs": [
+          "A vs B",
+          "A vs C",
+          "B vs C"
+        ],
+        "branch_summary": {
+          "A": {
+            "affected_count": 5,
+            "affected_ids": [
+              "U02",
+              "U04",
+              "U06",
+              "U08",
+              "U10"
+            ]
+          },
+          "B": {
+            "affected_count": 9,
+            "affected_ids": [
+              "U01",
+              "U02",
+              "U03",
+              "U04",
+              "U06",
+              "U07",
+              "U08",
+              "U09",
+              "U10"
+            ]
+          },
+          "C": {
+            "affected_count": 6,
+            "affected_ids": [
+              "U02",
+              "U04",
+              "U06",
+              "U08",
+              "U09",
+              "U10"
+            ]
+          }
+        }
+      }
+    },
+    "ambiguous_terms": [
+      {
+        "term": "inactive threshold",
+        "description": "Does not define the required number of days of inactivity before deletion.",
+        "interpretation_ids": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "term": "missing dates",
+        "description": "Fails to specify how accounts with missing activity timestamps should be classified.",
+        "interpretation_ids": [
+          "A",
+          "C"
+        ]
+      }
+    ],
+    "suggested_rewrite": "Delete user accounts with recorded inactivity exceeding 90 days. Flag accounts with null activity dates for audit without deleting.",
+    "warnings": []
+  }
+}

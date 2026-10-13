@@ -1,0 +1,105 @@
+{
+  "delete old user records.": {
+    "entity": "user",
+    "today": "2026-01-01",
+    "record_count": 10,
+    "branches": {
+      "A": {
+        "affected_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U10"
+        ],
+        "affected_count": 5
+      },
+      "B": {
+        "affected_ids": [
+          "U01",
+          "U02",
+          "U03",
+          "U04",
+          "U06",
+          "U07",
+          "U08",
+          "U09",
+          "U10"
+        ],
+        "affected_count": 9
+      },
+      "C": {
+        "affected_ids": [
+          "U02",
+          "U04",
+          "U06",
+          "U08",
+          "U09",
+          "U10"
+        ],
+        "affected_count": 6
+      }
+    },
+    "comparison": {
+      "diverges": true,
+      "distinct_sets": 3,
+      "only_in": {
+        "A": [],
+        "B": [
+          "U01",
+          "U03",
+          "U07"
+        ],
+        "C": []
+      },
+      "common_ids": [
+        "U02",
+        "U04",
+        "U06",
+        "U08",
+        "U10"
+      ]
+    }
+  },
+  "archive old log files.": {
+    "entity": "log_file",
+    "today": "2026-01-01",
+    "record_count": 10,
+    "branches": {
+      "A": {
+        "affected_ids": [
+          "LOG-01",
+          "LOG-02",
+          "LOG-04",
+          "LOG-06",
+          "LOG-08"
+        ],
+        "affected_count": 5
+      },
+      "B": {
+        "affected_ids": [
+          "LOG-01",
+          "LOG-04",
+          "LOG-06"
+        ],
+        "affected_count": 3
+      }
+    },
+    "comparison": {
+      "diverges": true,
+      "distinct_sets": 2,
+      "only_in": {
+        "A": [
+          "LOG-02",
+          "LOG-08"
+        ],
+        "B": []
+      },
+      "common_ids": [
+        "LOG-01",
+        "LOG-04",
+        "LOG-06"
+      ]
+    }
+  }
+}
